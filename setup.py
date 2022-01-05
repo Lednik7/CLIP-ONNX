@@ -3,8 +3,7 @@ import pkg_resources
 from setuptools import setup, find_packages
 
 setup(
-    name="clip-onnx",
-    py_modules=["clip_onnx"],
+    name="clip_onnx",
     version="1.0",
     description="",
     author="Maxim Gerasimov",
@@ -15,6 +14,5 @@ setup(
             open(os.path.join(os.path.dirname(__file__), "requirements.txt"))
         )
     ],
-    include_package_data=True,
-    extras_require={'dev': ['pytest']}
+    include_package_data=True
 )
