@@ -3,3 +3,4 @@ onnxruntime==1.10.0
 onnx==1.10.2
 onnxruntime-gpu==1.10.0
 numpy==1.21.5
+clip @ git+https://github.com/openai/CLIP.git
