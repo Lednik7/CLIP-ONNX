@@ -15,5 +15,6 @@ setup(
             open(os.path.join(os.path.dirname(__file__), "requirements.txt"))
         )
     ],
-    include_package_data=True
+    include_package_data=True,
+    extras_require={'dev': ['pytest']}
 )
