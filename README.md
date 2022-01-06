@@ -1,5 +1,8 @@
 # CLIP-ONNX
 It is a simple library to speed up CLIP inference up to 3x (K80 GPU)!
+
+<a href="https://colab.research.google.com/github/Lednik7/CLIP-ONNX/blob/main/examples/readme_example.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
+
 ## Usage
 Install clip-onnx module and requirements first. Use this trick
 ```python3
