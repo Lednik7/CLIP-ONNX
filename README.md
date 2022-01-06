@@ -15,6 +15,7 @@ Install clip-onnx module and requirements first. Use this trick
 ```python3
 import clip
 from PIL import Image
+import numpy as np
 
 # onnx cannot work with cuda
 model, preprocess = clip.load("ViT-B/32", device="cpu", jit=False)
