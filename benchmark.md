@@ -1,7 +1,7 @@
 # CPU benchmarks
 Run on Intel (R) Xeon (R) CPU @ 2.30 GHz with 2 cores (Google Colab session)
 
-| ONNX   |   batch |   encode_image |   encode_text |   summary |
+| ONNX   |   batch |   encode_image |   encode_text |   total |
 |:------|--------:|---------------:|--------------:|----------:|
 | ViT-B/32  |       2 |          0.399 |         0.219 |     0.618 |
 | ViT-B/32  |       8 |          1.206 |         0.791 |     1.997 |
@@ -9,7 +9,7 @@ Run on Intel (R) Xeon (R) CPU @ 2.30 GHz with 2 cores (Google Colab session)
 | ViT-B/32  |      32 |          4.583 |         3.199 |     7.782 |
 | ViT-B/32  |      64 |          9.372 |         6.885 |    16.257 |
 
-| TORCH   |   batch |   encode_image |   encode_text |   summary |
+| TORCH   |   batch |   encode_image |   encode_text |   total |
 |:------|--------:|---------------:|--------------:|----------:|
 | ViT-B/32 |       2 |          0.402 |         0.269 |     0.671 |
 | ViT-B/32 |       8 |          1.21  |         0.849 |     2.059 |
@@ -20,7 +20,7 @@ Run on Intel (R) Xeon (R) CPU @ 2.30 GHz with 2 cores (Google Colab session)
 # GPU benchmarks
 Run on NVIDIA Tesla K80 (Google Colab session)
 
-| ONNX     |   batch |   encode_image |   encode_text |   summary |
+| ONNX     |   batch |   encode_image |   encode_text |   total |
 |:---------|--------:|---------------:|--------------:|----------:|
 | ViT-B/32 |       2 |          0.073 |         0.032 |     0.105 |
 | ViT-B/32 |       8 |          0.088 |         0.052 |     0.14  |
@@ -28,7 +28,7 @@ Run on NVIDIA Tesla K80 (Google Colab session)
 | ViT-B/32 |      32 |          0.196 |         0.138 |     0.334 |
 | ViT-B/32 |      64 |          0.352 |         0.252 |     0.604 |
 
-| TORCH    |   batch |   encode_image |   encode_text |   summary |
+| TORCH    |   batch |   encode_image |   encode_text |   total |
 |:---------|--------:|---------------:|--------------:|----------:|
 | ViT-B/32 |       2 |          0.041 |         0.033 |     0.074 |
 | ViT-B/32 |       8 |          0.128 |         0.102 |     0.23  |
