@@ -94,4 +94,4 @@ class clip_converter(nn.Module):
             self.onnx_checker(self.textual_path)
 
         if verbose:
-            print("[CLIP ONNX] Models converts succesfully")
+            print("[CLIP ONNX] Models converts successfully")

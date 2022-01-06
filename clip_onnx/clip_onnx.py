@@ -1,7 +1,6 @@
 from .clip_converter import clip_converter
 import torch
 import onnxruntime
-import numpy as np
 
 
 class clip_onnx(clip_converter):
@@ -35,14 +34,12 @@ class clip_onnx(clip_converter):
             self.textual_session = onnxruntime.InferenceSession(self.textual_path,
                                                                 providers=providers)
 
-    def visual_run(self, image):
-        onnx_image = image.detach().cpu().numpy().astype(np.float32)
+    def visual_run(self, onnx_image):
         onnx_input_image = {self.visual_session.get_inputs()[0].name: onnx_image}
         visual_output, = self.visual_session.run(None, onnx_input_image)
         return visual_output
 
-    def textual_run(self, text):
-        onnx_text = text.detach().cpu().numpy().astype(np.int64)
+    def textual_run(self, onnx_text):
         onnx_input_text = {self.textual_session.get_inputs()[0].name: onnx_text}
         textual_output, = self.textual_session.run(None, onnx_input_text)
         return textual_output
