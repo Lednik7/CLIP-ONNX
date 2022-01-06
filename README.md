@@ -22,11 +22,11 @@ model, preprocess = clip.load("ViT-B/32", device="cpu", jit=False)
 
 # batch first
 image = preprocess(Image.open("CLIP.png")).unsqueeze(0) # [1, 3, 224, 224]
-image = image.detach().cpu().numpy().astype(np.float32)
+image_onnx = image.detach().cpu().numpy().astype(np.float32)
 
 # batch first
 text = clip.tokenize(["a diagram", "a dog", "a cat"]) # [3, 77]
-text = text.detach().cpu().numpy().astype(np.int64)
+text_onnx = text.detach().cpu().numpy().astype(np.int64)
 ```
 2. Create CLIP-ONNX object to convert model to onnx
 ```python3
@@ -43,10 +43,10 @@ onnx_model.start_sessions(providers=["CPUExecutionProvider"]) # cpu mode
 ```
 3. Use for standard CLIP API. Batch inference
 ```python3
-image_features = onnx_model.encode_image(image)
-text_features = onnx_model.encode_text(text)
+image_features = onnx_model.encode_image(image_onnx)
+text_features = onnx_model.encode_text(text_onnx)
 
-logits_per_image, logits_per_text = onnx_model(image, text)
+logits_per_image, logits_per_text = onnx_model(image_onnx, text_onnx)
 probs = logits_per_image.softmax(dim=-1).detach().cpu().numpy()
 
 print("Label probs:", probs)  # prints: [[0.41456965 0.29270944 0.29272085]]

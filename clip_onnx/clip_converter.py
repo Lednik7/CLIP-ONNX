@@ -3,7 +3,6 @@ import onnx
 from torch import nn
 # from onnxruntime.quantization import quantize_qat, quantize_dynamic, QuantType
 from .utils import Textual
-import numpy as np
 
 
 class clip_converter(nn.Module):
@@ -66,8 +65,8 @@ class clip_converter(nn.Module):
         self.onnx_checker(self.textual_path)
 
     def convert2onnx(self, visual_input=None, textual_input=None, verbose=True):
-        isinstance_visual_input = isinstance(visual_input, (np.ndarray))
-        isinstance_textual_input = isinstance(textual_input, (np.ndarray))
+        isinstance_visual_input = isinstance(visual_input, (torch.Tensor))
+        isinstance_textual_input = isinstance(textual_input, (torch.Tensor))
 
         if (not isinstance_visual_input) and (not isinstance_textual_input):
             raise Exception("[CLIP ONNX] Please, choose a dummy input")
