@@ -5,43 +5,51 @@ import numpy as np
 
 
 class clip_onnx(clip_converter):
-    def __init__(self, model, providers=['TensorrtExecutionProvider',
-                                         'CUDAExecutionProvider',
-                                         'CPUExecutionProvider'],
+    def __init__(self, model=None, providers=['TensorrtExecutionProvider',
+                                              'CUDAExecutionProvider',
+                                              'CPUExecutionProvider'],
                  visual_path: str = "clip_visual.onnx",
-                 textual_path : str = "clip_textual.onnx"):
-        super().__init__(model, visual_path, textual_path)
+                 textual_path: str = "clip_textual.onnx"):
         self.providers = providers
-    
-    # def load_onnx(self, visual_path=None, textual_path=None):
-    #     if visual_path:
-    #         self.visual_path = visual_path
-    #         self.visual_flag = True
-    #     if textual_path:
-    #         self.textual_path = textual_path
-    #         self.textual_flag = True
+
+        if not isinstance(model, (type(None))):
+            super().__init__(model, visual_path, textual_path)
+        else:
+            print("[CLIP ONNX] Load mode")
+
+    def load_onnx(self, visual_path=None, textual_path=None, logit_scale=None):
+        if visual_path and textual_path:
+            if not logit_scale:
+                raise Exception("For this mode logit_scale must be specified. Example: model.logit_scale.exp()")
+            self.logit_scale = logit_scale
+        if visual_path:
+            self.visual_path = visual_path
+            self.visual_flag = True
+        if textual_path:
+            self.textual_path = textual_path
+            self.textual_flag = True
 
     def start_sessions(self):
         if self.visual_flag:
             self.visual_session = onnxruntime.InferenceSession(self.visual_path,
-                                                            providers=self.providers)
+                                                               providers=self.providers)
         if self.textual_flag:
             self.textual_session = onnxruntime.InferenceSession(self.textual_path,
                                                                 providers=self.providers)
-    
+
     def visual_run(self, image):
         onnx_image = image.detach().cpu().numpy().astype(np.float32)
         onnx_input_image = {self.visual_session.get_inputs()[0].name: onnx_image}
         visual_output, = self.visual_session.run(None, onnx_input_image)
         return visual_output
-    
+
     def textual_run(self, text):
         onnx_text = text.detach().cpu().numpy().astype(np.int64)
         onnx_input_text = {self.textual_session.get_inputs()[0].name: onnx_text}
         textual_output, = self.textual_session.run(None, onnx_input_text)
         return textual_output
-    
-    def forward(self, image, text):
+
+    def __call__(self, image, text):
         assert self.visual_flag and self.textual_flag
         image_features = torch.from_numpy(self.visual_run(image))
         text_features = torch.from_numpy(self.textual_run(text))
@@ -51,15 +59,14 @@ class clip_onnx(clip_converter):
         text_features = text_features / text_features.norm(dim=-1, keepdim=True)
 
         # cosine similarity as logits
-        logit_scale = self.model.logit_scale.exp()
-        logits_per_image = logit_scale * image_features @ text_features.t()
+        logits_per_image = self.logit_scale * image_features @ text_features.t()
         logits_per_text = logits_per_image.t()
 
         # shape = [global_batch_size, global_batch_size]
         return logits_per_image, logits_per_text
-    
+
     def encode_image(self, image):
         return self.visual_run(image)
-    
+
     def encode_text(self, text):
         return self.textual_run(text)
