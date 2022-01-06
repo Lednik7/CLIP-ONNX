@@ -1,9 +1,10 @@
 # CLIP-ONNX
-It is a simple library to speed up CLIP inference up to 3x (K80 GPU)
+It is a simple library to speed up CLIP inference up to 3x (K80 GPU)!
 ## Usage
 Install clip-onnx module and requirements first. Use this trick
 ```python3
 !pip install git+https://github.com/Lednik7/CLIP-ONNX.git
+!pip install git+https://github.com/openai/CLIP.git
 !pip install onnxruntime-gpu
 ```
 ## Example in 3 steps
@@ -21,11 +22,11 @@ import numpy as np
 model, preprocess = clip.load("ViT-B/32", device="cpu", jit=False)
 
 # batch first
-image = preprocess(Image.open("CLIP.png")).unsqueeze(0) # [1, 3, 224, 224]
+image = preprocess(Image.open("CLIP.png")).unsqueeze(0).cpu() # [1, 3, 224, 224]
 image_onnx = image.detach().cpu().numpy().astype(np.float32)
 
 # batch first
-text = clip.tokenize(["a diagram", "a dog", "a cat"]) # [3, 77]
+text = clip.tokenize(["a diagram", "a dog", "a cat"]).cpu() # [3, 77]
 text_onnx = text.detach().cpu().numpy().astype(np.int64)
 ```
 2. Create CLIP-ONNX object to convert model to onnx
@@ -52,7 +53,8 @@ probs = logits_per_image.softmax(dim=-1).detach().cpu().numpy()
 print("Label probs:", probs)  # prints: [[0.41456965 0.29270944 0.29272085]]
 ```
 Enjoy the speed
-
+## Best practices
+See [benchmark.md](https://github.com/Lednik7/CLIP-ONNX/tree/main/benchmark.md)
 ## Examples
 See [examples folder](https://github.com/Lednik7/CLIP-ONNX/tree/main/examples) for more details \
 Some parts of the code were taken from the [post](https://twitter.com/apeoffire/status/1478493291008172038). Thank you [neverix](https://github.com/neverix) for this notebook.
