@@ -44,10 +44,10 @@ class clip_onnx(clip_converter):
         textual_output, = self.textual_session.run(None, onnx_input_text)
         return textual_output
 
-    def __call__(self, image, text):
+    def __call__(self, image, text, device: str = "cpu"):
         assert self.visual_flag and self.textual_flag
-        image_features = torch.from_numpy(self.visual_run(image))
-        text_features = torch.from_numpy(self.textual_run(text))
+        image_features = torch.from_numpy(self.visual_run(image)).to(device)
+        text_features = torch.from_numpy(self.textual_run(text)).to(device)
 
         # normalized features
         image_features = image_features / image_features.norm(dim=-1, keepdim=True)
