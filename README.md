@@ -4,6 +4,7 @@ It is a simple library to speed up CLIP inference up to 3x (K80 GPU)
 Install clip-onnx module and requirements first. Use this trick
 ```python3
 !pip install git+https://github.com/Lednik7/CLIP-ONNX.git
+!pip install onnxruntime-gpu
 ```
 ## Example in 3 steps
 0. Download CLIP image from repo
@@ -18,8 +19,8 @@ from PIL import Image
 # onnx cannot work with cuda
 model, preprocess = clip.load("ViT-B/32", device="cpu", jit=False)
 # batch first
-image = preprocess(Image.open("CLIP.png")).unsqueeze(0) # [1, 3, 224, 224]
-text = clip.tokenize(["a diagram", "a dog", "a cat"]) # [3, 77]
+image = preprocess(Image.open("CLIP.png")).unsqueeze(0).cpu() # [1, 3, 224, 224]
+text = clip.tokenize(["a diagram", "a dog", "a cat"]).cpu() # [3, 77]
 ```
 2. Create CLIP-ONNX object to convert model to onnx
 ```python3
@@ -29,11 +30,10 @@ clip.model.ResidualAttentionBlock.attention = attention
 visual_path = "clip_visual.onnx"
 textual_path = "clip_textual.onnx"
 
-# ['TensorrtExecutionProvider', 'CUDAExecutionProvider', 'CPUExecutionProvider']
-onnx_model = clip_onnx(model, providers=["CPUExecutionProvider"], # cpu mode
-                       visual_path=visual_path, textual_path=textual_path)
+onnx_model = clip_onnx(model, visual_path=visual_path, textual_path=textual_path)
 onnx_model.convert2onnx(image, text, verbose=True)
-onnx_model.start_sessions()
+# ['TensorrtExecutionProvider', 'CUDAExecutionProvider', 'CPUExecutionProvider']
+onnx_model.start_sessions(providers=["CPUExecutionProvider"]) # cpu mode
 ```
 3. Use for standard CLIP API. Batch inference
 ```python3

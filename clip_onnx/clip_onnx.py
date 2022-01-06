@@ -5,13 +5,9 @@ import numpy as np
 
 
 class clip_onnx(clip_converter):
-    def __init__(self, model=None, providers=['TensorrtExecutionProvider',
-                                              'CUDAExecutionProvider',
-                                              'CPUExecutionProvider'],
+    def __init__(self, model=None,
                  visual_path: str = "clip_visual.onnx",
                  textual_path: str = "clip_textual.onnx"):
-        self.providers = providers
-
         if not isinstance(model, (type(None))):
             super().__init__(model, visual_path, textual_path)
         else:
@@ -29,13 +25,15 @@ class clip_onnx(clip_converter):
             self.textual_path = textual_path
             self.textual_flag = True
 
-    def start_sessions(self):
+    def start_sessions(self, providers=['TensorrtExecutionProvider',
+                                        'CUDAExecutionProvider',
+                                        'CPUExecutionProvider']):
         if self.visual_flag:
             self.visual_session = onnxruntime.InferenceSession(self.visual_path,
-                                                               providers=self.providers)
+                                                               providers=providers)
         if self.textual_flag:
             self.textual_session = onnxruntime.InferenceSession(self.textual_path,
-                                                                providers=self.providers)
+                                                                providers=providers)
 
     def visual_run(self, image):
         onnx_image = image.detach().cpu().numpy().astype(np.float32)
