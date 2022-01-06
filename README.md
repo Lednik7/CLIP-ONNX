@@ -26,8 +26,12 @@ text = clip.tokenize(["a diagram", "a dog", "a cat"]) # [3, 77]
 from clip_onnx import clip_onnx, attention
 clip.model.ResidualAttentionBlock.attention = attention
 
+visual_path = "clip_visual.onnx"
+textual_path = "clip_textual.onnx"
+
 # ['TensorrtExecutionProvider', 'CUDAExecutionProvider', 'CPUExecutionProvider']
-onnx_model = clip_onnx(model, providers=["CPUExecutionProvider"]) # cpu mode
+onnx_model = clip_onnx(model, providers=["CPUExecutionProvider"], # cpu mode
+                       visual_path=visual_path, textual_path=textual_path)
 onnx_model.convert2onnx(image, text, verbose=True)
 onnx_model.start_sessions()
 ```
