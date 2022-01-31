@@ -1,8 +1,9 @@
 import torch
 import onnx
 from torch import nn
-# from onnxruntime.quantization import quantize_qat, quantize_dynamic, QuantType
+from onnxruntime.quantization import quantize_qat, quantize_dynamic, QuantType
 from .utils import Textual
+import utils
 
 
 class clip_converter(nn.Module):
@@ -20,51 +21,48 @@ class clip_converter(nn.Module):
         for x in self.model.parameters():
             x.requires_grad = False
 
-    # def quantization(self, mode):
-    #     assert mode in ["dynamic", "qat"]
-    #     if mode == "dynamic":
-    #         model_quant_visual = f"{self.visual_path}.quant"
-    #         quantized_model = quantize_dynamic(self.visual_path,
-    #                                            model_quant_visual,
-    #                                            weight_type=QuantType.QUInt8)
-    #         self.visual_path = model_quant_visual
-    #
-    #         model_quant_textual = f"{self.textual_path}.quant"
-    #         quantized_model = quantize_dynamic(self.textual_path,
-    #                                            model_quant_textual,
-    #                                            weight_type=QuantType.QUInt8)
-    #         self.textual_path = model_quant_textual
-    #     elif mode == "qat":
-    #         model_quant_visual = f"{self.visual_path}.quant"
-    #         quantized_model = quantize_qat(self.visual_path, model_quant_visual)
-    #         self.visual_path = model_quant_visual
-    #
-    #         model_quant_textual = f"{self.textual_path}.quant"
-    #         quantized_model = quantize_qat(self.textual_path, model_quant_textual)
-    #         self.textual_path = model_quant_textual
+    def quantization(self, mode: str = "dynamic"):
+        assert mode in ["dynamic"]
+        if mode == "dynamic":
+            model_quant_visual = f"{self.visual_path}.quant"
+            quantize_dynamic(self.visual_path,
+                             model_quant_visual,
+                             weight_type=QuantType.QUInt8)
+            self.visual_path = model_quant_visual
 
-    def torch_export(self, model, dummy_input, path: str):
-        torch.onnx.export(model, dummy_input, path,
-                          input_names=['input'], output_names=['output'],
-                          export_params=True, verbose=False, opset_version=14,
-                          do_constant_folding=True,
-                          dynamic_axes={'input': {0: 'batch_size'}, 'output': {0: 'batch_size'}})
+            model_quant_textual = f"{self.textual_path}.quant"
+            quantize_dynamic(self.textual_path,
+                             model_quant_textual,
+                             weight_type=QuantType.QUInt8)
+            self.textual_path = model_quant_textual
+
+    def torch_export(self, model, dummy_input, path: str, export_params=utils.DEFAULT_EXPORT):
+        torch.onnx.export(model, dummy_input, path, **export_params)
 
     def onnx_checker(self, path: str):
         model = onnx.load(path)
         onnx.checker.check_model(model)
         del model
 
-    def convert_visual(self, dummy_input):
-        self.torch_export(self.model.visual, dummy_input, self.visual_path)
+    def convert_visual(self, dummy_input, wrapper=lambda x: x,
+                       export_params=utils.DEFAULT_EXPORT):
+        visual = wrapper(self.model.visual)
+        self.torch_export(visual, dummy_input, self.visual_path,
+                          export_params=export_params)
         self.onnx_checker(self.visual_path)
 
-    def convert_textual(self, dummy_input):
-        textual = Textual(self.model)
-        self.torch_export(textual, dummy_input, self.textual_path)
+    def convert_textual(self, dummy_input, wrapper=Textual,
+                        export_params=utils.DEFAULT_EXPORT):
+        textual = wrapper(self.model)
+        self.torch_export(textual, dummy_input, self.textual_path,
+                          export_params=export_params)
         self.onnx_checker(self.textual_path)
 
-    def convert2onnx(self, visual_input=None, textual_input=None, verbose=True):
+    def convert2onnx(self, visual_input=None, textual_input=None, verbose=True,
+                     visual_wrapper=lambda x: x,
+                     textual_wrapper=Textual,
+                     visual_export_params=utils.DEFAULT_EXPORT,
+                     textual_export_params=utils.DEFAULT_EXPORT):
         isinstance_visual_input = isinstance(visual_input, (torch.Tensor))
         isinstance_textual_input = isinstance(textual_input, (torch.Tensor))
 
@@ -79,7 +77,7 @@ class clip_converter(nn.Module):
             self.visual_flag = True
             if verbose:
                 print("[CLIP ONNX] Start convert visual model")
-            self.convert_visual(visual_input)
+            self.convert_visual(visual_input, visual_wrapper, visual_export_params)
             if verbose:
                 print("[CLIP ONNX] Start check visual model")
             self.onnx_checker(self.visual_path)
@@ -88,7 +86,7 @@ class clip_converter(nn.Module):
             self.textual_flag = True
             if verbose:
                 print("[CLIP ONNX] Start convert textual model")
-            self.convert_textual(textual_input)
+            self.convert_textual(textual_input, textual_wrapper, textual_export_params)
             if verbose:
                 print("[CLIP ONNX] Start check textual model")
             self.onnx_checker(self.textual_path)

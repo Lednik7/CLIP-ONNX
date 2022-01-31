@@ -46,3 +46,9 @@ def attention(self, x: torch.Tensor):
     attn_output = attn_output.transpose(0, 1).contiguous().view(q.shape)
     attn_output = F.linear(attn_output, self.attn.out_proj.weight, self.attn.out_proj.bias)
     return attn_output
+
+
+DEFAULT_EXPORT = dict(input_names=['input'], output_names=['output'],
+                      export_params=True, verbose=False, opset_version=14,
+                      do_constant_folding=True,
+                      dynamic_axes={'input': {0: 'batch_size'}, 'output': {0: 'batch_size'}})
