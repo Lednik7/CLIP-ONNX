@@ -2,8 +2,7 @@ import torch
 import onnx
 from torch import nn
 from onnxruntime.quantization import quantize_qat, quantize_dynamic, QuantType
-from .utils import Textual
-import utils
+from .utils import Textual, DEFAULT_EXPORT
 
 
 class clip_converter(nn.Module):
@@ -36,7 +35,7 @@ class clip_converter(nn.Module):
                              weight_type=QuantType.QUInt8)
             self.textual_path = model_quant_textual
 
-    def torch_export(self, model, dummy_input, path: str, export_params=utils.DEFAULT_EXPORT):
+    def torch_export(self, model, dummy_input, path: str, export_params=DEFAULT_EXPORT):
         torch.onnx.export(model, dummy_input, path, **export_params)
 
     def onnx_checker(self, path: str):
@@ -45,14 +44,14 @@ class clip_converter(nn.Module):
         del model
 
     def convert_visual(self, dummy_input, wrapper=lambda x: x,
-                       export_params=utils.DEFAULT_EXPORT):
+                       export_params=DEFAULT_EXPORT):
         visual = wrapper(self.model.visual)
         self.torch_export(visual, dummy_input, self.visual_path,
                           export_params=export_params)
         self.onnx_checker(self.visual_path)
 
     def convert_textual(self, dummy_input, wrapper=Textual,
-                        export_params=utils.DEFAULT_EXPORT):
+                        export_params=DEFAULT_EXPORT):
         textual = wrapper(self.model)
         self.torch_export(textual, dummy_input, self.textual_path,
                           export_params=export_params)
@@ -61,8 +60,8 @@ class clip_converter(nn.Module):
     def convert2onnx(self, visual_input=None, textual_input=None, verbose=True,
                      visual_wrapper=lambda x: x,
                      textual_wrapper=Textual,
-                     visual_export_params=utils.DEFAULT_EXPORT,
-                     textual_export_params=utils.DEFAULT_EXPORT):
+                     visual_export_params=DEFAULT_EXPORT,
+                     textual_export_params=DEFAULT_EXPORT):
         isinstance_visual_input = isinstance(visual_input, (torch.Tensor))
         isinstance_textual_input = isinstance(textual_input, (torch.Tensor))
 
