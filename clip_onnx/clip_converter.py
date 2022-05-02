@@ -1,7 +1,7 @@
 import torch
 import onnx
 from torch import nn
-from onnxruntime.quantization import quantize_qat, quantize_dynamic, QuantType
+from onnxruntime.quantization import quantize_dynamic, QuantType
 from .utils import Textual, DEFAULT_EXPORT
 
 

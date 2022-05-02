@@ -37,7 +37,7 @@ image_onnx = image.detach().cpu().numpy().astype(np.float32)
 
 # batch first
 text = clip.tokenize(["a diagram", "a dog", "a cat"]).cpu() # [3, 77]
-text_onnx = text.detach().cpu().numpy().astype(np.int64)
+text_onnx = text.detach().cpu().numpy().astype(np.int32)
 ```
 2. Create CLIP-ONNX object to convert model to onnx
 ```python3
@@ -65,7 +65,8 @@ print("Label probs:", probs)  # prints: [[0.41456965 0.29270944 0.29272085]]
 Enjoy the speed
 ## Model Zoo
 Models of the original CLIP can be found on this [page](https://github.com/jina-ai/clip-as-service/blob/main/server/clip_server/model/clip_onnx.py).\
-They are not part of this library but should work correctly
+They are not part of this library but should work correctly.
+
 ## Best practices
 See [benchmark.md](https://github.com/Lednik7/CLIP-ONNX/tree/main/benchmark.md)
 ## Examples
