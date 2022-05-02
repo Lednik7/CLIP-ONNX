@@ -62,6 +62,17 @@ probs = logits_per_image.softmax(dim=-1).detach().cpu().numpy()
 
 print("Label probs:", probs)  # prints: [[0.41456965 0.29270944 0.29272085]]
 ```
+#### Notes:
+If you use:
+```python3
+clip.model.ResidualAttentionBlock.attention = attention
+```
+The results may not match. To avoid this, you must manually change the **logit_scale** parameter.\
+For the example above:
+ ```python3
+onnx_model.logit_scale = 1600 # -> Label probs: [[0.99242663 0.00378558 0.00378777]]
+ ```
+
 Enjoy the speed
 ## Model Zoo
 Models of the original CLIP can be found on this [page](https://github.com/jina-ai/clip-as-service/blob/main/server/clip_server/model/clip_onnx.py).\
