@@ -37,7 +37,7 @@ image_onnx = image.detach().cpu().numpy().astype(np.float32)
 
 # batch first
 text = clip.tokenize(["a diagram", "a dog", "a cat"]).cpu() # [3, 77]
-text_onnx = text.detach().cpu().numpy().astype(np.int64)
+text_onnx = text.detach().cpu().numpy().astype(np.int32)
 ```
 2. Create CLIP-ONNX object to convert model to onnx
 ```python3
