@@ -69,11 +69,25 @@ clip.model.ResidualAttentionBlock.attention = attention
 ```
 The results may not match. To avoid this, you must manually change the **logit_scale** parameter.\
 For the example above:
- ```python3
+```python3
 onnx_model.logit_scale = 1600 # -> Label probs: [[0.99242663 0.00378558 0.00378777]]
- ```
+```
+**Enjoy the speed**
 
-Enjoy the speed
+## Load saved model
+Example for ViT-B/32 from Model Zoo
+```python3
+!wget https://clip-as-service.s3.us-east-2.amazonaws.com/models/onnx/ViT-B-32/visual.onnx
+!wget https://clip-as-service.s3.us-east-2.amazonaws.com/models/onnx/ViT-B-32/textual.onnx
+```
+```python3
+onnx_model = clip_onnx(None)
+onnx_model.load_onnx(visual_path="visual.onnx",
+                     textual_path="textual.onnx",
+                     logit_scale=100.0000) # model.logit_scale.exp()
+onnx_model.start_sessions(providers=["CPUExecutionProvider"])
+```
+
 ## Model Zoo
 Models of the original CLIP can be found on this [page](https://github.com/jina-ai/clip-as-service/blob/main/server/clip_server/model/clip_onnx.py).\
 They are not part of this library but should work correctly.
