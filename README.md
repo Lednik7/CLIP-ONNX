@@ -63,6 +63,10 @@ probs = logits_per_image.softmax(dim=-1).detach().cpu().numpy()
 print("Label probs:", probs)  # prints: [[0.41456965 0.29270944 0.29272085]]
 ```
 Enjoy the speed
+## Model Zoo
+Models of the original CLIP can be found on this [page](https://github.com/jina-ai/clip-as-service/blob/main/server/clip_server/model/clip_onnx.py).\
+They are not part of this library but should work correctly.
+
 ## Best practices
 See [benchmark.md](https://github.com/Lednik7/CLIP-ONNX/tree/main/benchmark.md)
 ## Examples
