@@ -41,8 +41,7 @@ text_onnx = text.detach().cpu().numpy().astype(np.int32)
 ```
 2. Create CLIP-ONNX object to convert model to onnx
 ```python3
-from clip_onnx import clip_onnx, attention
-clip.model.ResidualAttentionBlock.attention = attention
+from clip_onnx import clip_onnx
 
 visual_path = "clip_visual.onnx"
 textual_path = "clip_textual.onnx"
@@ -60,18 +59,9 @@ text_features = onnx_model.encode_text(text_onnx)
 logits_per_image, logits_per_text = onnx_model(image_onnx, text_onnx)
 probs = logits_per_image.softmax(dim=-1).detach().cpu().numpy()
 
-print("Label probs:", probs)  # prints: [[0.41456965 0.29270944 0.29272085]]
+print("Label probs:", probs)  # prints: [[0.9927937  0.00421067 0.00299571]]
 ```
-#### Notes:
-If you use:
-```python3
-clip.model.ResidualAttentionBlock.attention = attention
-```
-The results may not match. To avoid this, you must manually change the **logit_scale** parameter.\
-For the example above:
-```python3
-onnx_model.logit_scale = 1600 # -> Label probs: [[0.99242663 0.00378558 0.00378777]]
-```
+
 **Enjoy the speed**
 
 ## Load saved model
