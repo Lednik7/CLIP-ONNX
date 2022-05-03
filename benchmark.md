@@ -1,5 +1,5 @@
 # CPU benchmarks
-Run on Intel (R) Xeon (R) CPU @ 2.30 GHz with 2 cores (Google Colab session)
+#### Run on Intel (R) Xeon (R) CPU @ 2.30 GHz with 2 cores (Google Colab session)
 
 | ONNX     |   batch |   encode_image |   encode_text |   total |
 |:---------|--------:|---------------:|--------------:|--------:|
@@ -18,7 +18,25 @@ Run on Intel (R) Xeon (R) CPU @ 2.30 GHz with 2 cores (Google Colab session)
 | ViT-B/32 |      64 |          8.07  |         6.212 |  14.282 |
 
 # GPU benchmarks
-Run on NVIDIA Tesla T4 (Google Colab session)
+#### Run on NVIDIA Tesla K80 (Google Colab session)
+
+| ONNX     |   batch |   encode_image |   encode_text |   total |
+|:---------|--------:|---------------:|--------------:|--------:|
+| ViT-B/32 |       2 |          0.136 |         0.021 |   0.157 |
+| ViT-B/32 |       8 |          0.054 |         0.04  |   0.094 |
+| ViT-B/32 |      16 |          0.089 |         0.071 |   0.16  |
+| ViT-B/32 |      32 |          0.158 |         0.134 |   0.292 |
+| ViT-B/32 |      64 |          0.325 |         0.258 |   0.583 |
+
+| TORCH    |   batch |   encode_image |   encode_text |   total |
+|:---------|--------:|---------------:|--------------:|--------:|
+| ViT-B/32 |       2 |          0.02  |         0.035 |   0.055 |
+| ViT-B/32 |       8 |          0.081 |         0.098 |   0.179 |
+| ViT-B/32 |      16 |          0.207 |         0.196 |   0.403 |
+| ViT-B/32 |      32 |          0.44  |         0.374 |   0.814 |
+| ViT-B/32 |      64 |          0.919 |         0.719 |   1.638 |
+
+#### Run on NVIDIA Tesla T4 (Google Colab session)
 
 | ONNX     |   batch |   encode_image |   encode_text |   total |
 |:---------|--------:|---------------:|--------------:|--------:|
