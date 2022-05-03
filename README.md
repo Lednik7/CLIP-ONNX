@@ -41,8 +41,7 @@ text_onnx = text.detach().cpu().numpy().astype(np.int32)
 ```
 2. Create CLIP-ONNX object to convert model to onnx
 ```python3
-from clip_onnx import clip_onnx, attention
-clip.model.ResidualAttentionBlock.attention = attention
+from clip_onnx import clip_onnx
 
 visual_path = "clip_visual.onnx"
 textual_path = "clip_textual.onnx"
@@ -60,18 +59,9 @@ text_features = onnx_model.encode_text(text_onnx)
 logits_per_image, logits_per_text = onnx_model(image_onnx, text_onnx)
 probs = logits_per_image.softmax(dim=-1).detach().cpu().numpy()
 
-print("Label probs:", probs)  # prints: [[0.41456965 0.29270944 0.29272085]]
+print("Label probs:", probs)  # prints: [[0.9927937  0.00421067 0.00299571]]
 ```
-#### Notes:
-If you use:
-```python3
-clip.model.ResidualAttentionBlock.attention = attention
-```
-The results may not match. To avoid this, you must manually change the **logit_scale** parameter.\
-For the example above:
-```python3
-onnx_model.logit_scale = 1600 # -> Label probs: [[0.99242663 0.00378558 0.00378777]]
-```
+
 **Enjoy the speed**
 
 ## Load saved model
@@ -91,6 +81,47 @@ onnx_model.start_sessions(providers=["CPUExecutionProvider"])
 ## Model Zoo
 Models of the original CLIP can be found on this [page](https://github.com/jina-ai/clip-as-service/blob/main/server/clip_server/model/clip_onnx.py).\
 They are not part of this library but should work correctly.
+
+## If something doesn't work
+It happens that onnx does not convert the model the first time, in these cases it is worth trying to run it again.
+
+If it doesn't help, it makes sense to change the export settings.
+
+Model export options in onnx looks like this:
+```python3
+DEFAULT_EXPORT = dict(input_names=['input'], output_names=['output'],
+                      export_params=True, verbose=False, opset_version=12,
+                      do_constant_folding=True,
+                      dynamic_axes={'input': {0: 'batch_size'}, 'output': {0: 'batch_size'}})
+```
+
+You can change them pretty easily.
+```python3
+from clip_onnx.utils import DEFAULT_EXPORT
+
+DEFAULT_EXPORT["opset_version"] = 15
+```
+
+Alternative option (change only visual or textual):
+```python3
+from clip_onnx import clip_onnx
+from clip_onnx.utils import DEFAULT_EXPORT
+
+visual_path = "clip_visual.onnx"
+textual_path = "clip_textual.onnx"
+
+textual_export_params = DEFAULT_EXPORT.copy()
+textual_export_params["dynamic_axes"] = {'input': {1: 'batch_size'},
+                                         'output': {0: 'batch_size'}}
+textual_export_params["opset_version"] = 12
+
+Textual = lambda x: x
+
+onnx_model = clip_onnx(model.cpu(), visual_path=visual_path, textual_path=textual_path)
+onnx_model.convert2onnx(dummy_input_image, dummy_input_text, verbose=True,
+                        textual_wrapper=Textual,
+                        textual_export_params=textual_export_params)
+```
 
 ## Best practices
 See [benchmark.md](https://github.com/Lednik7/CLIP-ONNX/tree/main/benchmark.md)

@@ -1,3 +1,3 @@
 torch==1.11.0+cu113
-onnxruntime==1.10.0
-onnx==1.10.2
+onnxruntime==1.11.1
+onnx==1.11.0
