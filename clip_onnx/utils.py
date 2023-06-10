@@ -32,20 +32,29 @@ class Textual(nn.Module):
 
 def attention(self, x: torch.Tensor):
     # onnx doesn't like multi_head_attention_forward so this is a reimplementation
+    self.attn_mask = self.attn_mask.to(dtype=x.dtype, device=x.device) if self.attn_mask is not None else None
     q, k, v = (torch.einsum("tbh, oh -> tbo", x, self.attn.in_proj_weight) + self.attn.in_proj_bias).contiguous().chunk(
         3, dim=-1)
     tgt_len = q.shape[0]
     bsz = q.shape[1]
     num_heads = self.attn.num_heads
     head_dim = q.shape[2] // num_heads
-    attn_output, attn_output_weights = F._scaled_dot_product_attention(
+    attn_output = scaled_dot_product_attention(
         q.reshape(tgt_len, bsz * num_heads, head_dim).transpose(0, 1),
         k.reshape(tgt_len, bsz * num_heads, head_dim).transpose(0, 1),
-        v.reshape(tgt_len, bsz * num_heads, head_dim).transpose(0, 1), None, 0.0
+        v.reshape(tgt_len, bsz * num_heads, head_dim).transpose(0, 1), self.attn_mask, 0.0
     )
     attn_output = attn_output.transpose(0, 1).contiguous().view(q.shape)
     attn_output = F.linear(attn_output, self.attn.out_proj.weight, self.attn.out_proj.bias)
     return attn_output
+
+def scaled_dot_product_attention(Q, K, V, attn_mask, dropout_p):
+    if attn_mask is None:
+        attn_weight = torch.softmax(Q @ K.transpose(-2, -1) / Q.size(-1)**0.5, dim=-1)
+    else:
+        attn_weight = torch.softmax(Q @ K.transpose(-2, -1) / Q.size(-1)**0.5 + attn_mask[None, ...], dim=-1)
+    # attn_weight = torch.dropout(attn_weight, dropout_p) # this is always 0.0 in CLIP so I comment it out.
+    return attn_weight @ V
 
 
 DEFAULT_EXPORT = dict(input_names=['input'], output_names=['output'],
